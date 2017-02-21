@@ -1,5 +1,5 @@
 {
-  "name": "dezbyte/url-filter-query",
+  "name": "dezbyte/grid-filter",
   "description": "URL Filter Query",
   "keywords": [
     "php url filter",
@@ -17,5 +17,10 @@
   "require": {
     "php": ">=5.5",
     "dez-php/dez-url": "~1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "DezByte\\Grid\\": "src/Grid"
+    }
   }
 }
