@@ -13,7 +13,7 @@ class Grid
 {
   
   const DEFAULT_MARKER = 'filter';
-
+  
   const LIKE = 'lk';
   const NOT_LIKE = 'nl';
   const EQ = 'eq';
@@ -22,6 +22,10 @@ class Grid
   const GE = 'ge';
   const LT = 'lt';
   const LE = 'le';
+  
+  const RESET_ALL = 1;
+  const RESET_COLUMN = 2;
+  const RESET_VALUE = 4;
   
   /**
    * @var array
@@ -37,18 +41,25 @@ class Grid
     self::LE
   ];
   
-  protected $url;
-  
   /**
    * @var string
    */
-  protected $filterMarker = self::DEFAULT_MARKER;
-
+  protected $prefixPath;
+  
+  /**
+   * @var Url
+   */
+  protected $url;
   
   /**
    * @var array
    */
   protected $filters = [];
+  
+  /**
+   * @var string
+   */
+  protected $filterMarker = self::DEFAULT_MARKER;
   
   /**
    * Grid constructor.
@@ -57,29 +68,6 @@ class Grid
   public function __construct(Url $url)
   {
     $this->url = $url;
-  }
-
-  /**
-   * @param $column
-   * @param $value
-   * @param $filter
-   * @param bool $reset
-   * @return string
-   */
-  public function filter($column, $value, $filter = Grid::EQ, $reset = false)
-  {
-    $rewrite = false === $reset ? $this->getFilters() : [];
-    
-    $rewrite[$column][$filter][] = $value;
-    
-    $parameters = $this->getParameters($rewrite);
-    
-    $filters = [];
-    foreach ($parameters as $column => $filter) {
-      $filters[] = sprintf('%s/%s', $column, $filter);
-    }
-    
-    return $this->url->path(sprintf('%s/%s', $this->getFilterMarker(), implode('/', $filters)));
   }
   
   /**
@@ -97,7 +85,7 @@ class Grid
       $pairs = array_chunk(array_slice($parameters, $index + 1), 2);
       
       foreach ($pairs as $pair) {
-    
+        
         list($column, $filters) = $pair;
         $filters = explode('-', $filters);
         
@@ -105,9 +93,10 @@ class Grid
         while ($filter = array_shift($filters)) {
           
           if (in_array($filter, $this->getAllowFilterNames(), true)) {
-            $filterName = $filter; continue;
+            $filterName = $filter;
+            continue;
           }
-  
+          
           $this->addFilter($column, $filterName, $filter);
         }
         
@@ -115,27 +104,6 @@ class Grid
     }
     
     return $this;
-  }
-  
-  /**
-   * @param array $rewrite
-   * @return array
-   */
-  public function getParameters(array $rewrite = [])
-  {
-    $parameters = [];
-    
-    foreach ($rewrite as $columnName => $filters) {
-      $columnFilter = [];
-      
-      foreach ($filters as $name => $filter) {
-        $columnFilter[] = sprintf('%s-%s', $name, implode('-', $filter));
-      }
-      
-      $parameters[$columnName] = implode('-', $columnFilter);
-    }
-    
-    return $parameters;
   }
   
   /**
@@ -176,5 +144,52 @@ class Grid
     return $this->filterMarker;
   }
   
+  /**
+   * @return string
+   */
+  public function getPrefixPath()
+  {
+    return $this->prefixPath;
+  }
+  
+  /**
+   * @param string $prefixPath
+   */
+  public function setPrefixPath($prefixPath)
+  {
+    $this->prefixPath = $prefixPath;
+  }
+  
+  /**
+   * @return Url
+   */
+  public function getUrl()
+  {
+    return $this->url;
+  }
+  
+  /**
+   * @param Url $url
+   */
+  public function setUrl(Url $url)
+  {
+    $this->url = $url;
+  }
+  
+  /**
+   * @return GridFilter
+   */
+  public function getFilter()
+  {
+    return new GridFilter($this);
+  }
+  
+  /**
+   * @return string
+   */
+  public function __toString()
+  {
+    return $this->getFilter()->render();
+  }
   
 }
