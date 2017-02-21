@@ -14,27 +14,27 @@ class Grid
   
   const DEFAULT_MARKER = 'filter';
 
-  const FILTER_LIKE = 'lk';
-  const FILTER_NOT_LIKE = 'nl';
-  const FILTER_EQ = 'eq';
-  const FILTER_NE = 'ne';
-  const FILTER_GT = 'gt';
-  const FILTER_GE = 'ge';
-  const FILTER_LT = 'lt';
-  const FILTER_LE = 'le';
+  const LIKE = 'lk';
+  const NOT_LIKE = 'nl';
+  const EQ = 'eq';
+  const NE = 'ne';
+  const GT = 'gt';
+  const GE = 'ge';
+  const LT = 'lt';
+  const LE = 'le';
   
   /**
    * @var array
    */
   protected $allowFilterNames = [
-    self::FILTER_LIKE,
-    self::FILTER_NOT_LIKE,
-    self::FILTER_EQ,
-    self::FILTER_NE,
-    self::FILTER_GT,
-    self::FILTER_GE,
-    self::FILTER_LT,
-    self::FILTER_LE
+    self::LIKE,
+    self::NOT_LIKE,
+    self::EQ,
+    self::NE,
+    self::GT,
+    self::GE,
+    self::LT,
+    self::LE
   ];
   
   /**
@@ -56,18 +56,43 @@ class Grid
   }
   
   /**
+   * @param $column
+   * @param $filter
+   * @param $value
+   * @param bool $reset
+   * @return string
+   */
+  public function filter($column, $value, $filter = Grid::EQ, $reset = false)
+  {
+    $rewrite = false === $reset
+      ? ['filters' => $this->getFilters()] : [];
+    
+    $rewrite['filters'][$column][$filter][] = $value;
+    
+    $parameters = $this->getParameters($rewrite);
+    
+    $array = [];
+    
+    foreach ($parameters as $column => $filter) {
+      $array[] = sprintf('%s/%s', $column, $filter);
+    }
+    
+    return implode('/', $array);
+  }
+  
+  /**
    * @param null $requestString
    * @return $this
    */
   public function processRequest($requestString = null)
   {
-    $pairs = explode('/', trim($requestString, '/'));
+    $parameters = explode('/', trim($requestString, '/'));
     
-    $index = array_search($this->getFilterMarker(), $pairs);
+    $index = array_search($this->getFilterMarker(), $parameters);
     
     if (false !== $index) {
       
-      $pairs = array_chunk(array_slice($pairs, $index + 1), 2);
+      $pairs = array_chunk(array_slice($parameters, $index + 1), 2);
       
       foreach ($pairs as $pair) {
     
@@ -75,20 +100,42 @@ class Grid
   
         $filters = explode('-', $filters);
         
-        $filterName = Grid::FILTER_EQ;
+        $filterName = Grid::EQ;
         while ($filter = array_shift($filters)) {
+          
           if (in_array($filter, $this->getAllowFilterNames(), true)) {
-            $filterName = $filter;
-          } else {
-            $this->addFilter($column, $filterName, $filter);
+            $filterName = $filter; continue;
           }
+  
+          $this->addFilter($column, $filterName, $filter);
         }
         
       }
     }
     
-    
     return $this;
+  }
+  
+  /**
+   * @param array $rewrite
+   * @return array
+   */
+  public function getParameters(array $rewrite = [])
+  {
+    $rewrite['filters'] = isset($rewrite['filters']) ? $rewrite['filters'] : $this->getFilters();
+  
+    $parameters = [];
+    foreach ($rewrite['filters'] as $columnName => $filters) {
+      $columnFilter = [];
+      
+      foreach ($filters as $name => $filter) {
+        $columnFilter[] = sprintf('%s-%s', $name, implode('-', $filter));
+      }
+      
+      $parameters[$columnName] = implode('-', $columnFilter);
+    }
+    
+    return $parameters;
   }
   
   /**
@@ -111,36 +158,6 @@ class Grid
   public function getFilters()
   {
     return $this->filters;
-  }
-  
-  /**
-   * @param $column
-   * @param null $filter
-   * @return mixed|null
-   */
-  public function getFilter($column, $filter = null)
-  {
-    if (null === $filter) {
-      return isset($this->filters[$column]) ? $this->filters[$column] : null;
-    }
-    
-    return isset($this->filters[$column][$filter]) ? $this->filters[$column][$filter] : null;
-  }
-  
-  /**
-   * @param $column
-   * @param null $filter
-   * @return $this
-   */
-  public function removeFilter($column, $filter = null)
-  {
-    if (null === $filter && isset($this->filters[$column])) {
-      unset($this->filters[$column]);
-    } elseif (isset($this->filters[$column], $this->filters[$column][$filter])) {
-      unset($this->filters[$column][$filter]);
-    }
-  
-    return $this;
   }
   
   /**
