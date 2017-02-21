@@ -106,19 +106,19 @@ class GridFilter
    */
   public function render()
   {
-    $columnFilters = [];
+    $grid = $this->getGrid();
   
     $this->prepareParameters();
-    
+  
+    $columnFilters = [];
     foreach ($this->getParameters() as $column => $filter) {
       $columnFilters[] = sprintf('%s/%s', $column, $filter);
     }
-    
-    $grid = $this->getGrid();
-
+  
+    $filterPath = implode('/', $columnFilters);
+  
     $path = $this->hasFilters()
-      ? sprintf('%s/%s/%s', $grid->getPrefixPath(), $grid->getFilterMarker(), implode('/', $columnFilters))
-      : $grid->getPrefixPath();
+      ? sprintf('%s/%s/%s', $grid->getPrefixPath(), $grid->getFilterMarker(), $filterPath) : $grid->getPrefixPath();
     
     return $grid->getUrl()->path($path);
   }

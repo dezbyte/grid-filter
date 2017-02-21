@@ -20,8 +20,8 @@ $filter->reset(Grid::RESET_COLUMN, 'manufacturer')->reset(Grid::RESET_COLUMN, 'e
 echo $filter, PHP_EOL, $filter->filter('brand', 'coca_cola'), PHP_EOL, $filter->reset(Grid::RESET_COLUMN, 'brand'), PHP_EOL, $filter->filter('brand', 'pepsi');
 
 $array = [
-  'size' => ['100x120', '120x150', '200x140', '10x3000', ],
-  'weight' => ['10kg', '31kg', '57.850g', '1ton', ],
+  'size' => ['100x120', '120x150', '200x140', '10x3000',],
+  'weight' => ['10kg', '31kg', '57.850g', '1ton',],
 ];
 
 foreach ($array as $name => $items) {
