@@ -1,0 +1,21 @@
+{
+  "name": "dezbyte/url-filter-query",
+  "description": "URL Filter Query",
+  "keywords": [
+    "php url filter",
+    "filter",
+    "dezbyte url filter"
+  ],
+  "authors": [
+    {
+      "name": "Ivan Gontarenko",
+      "email": "stewie.dev@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "type": "library",
+  "require": {
+    "php": ">=5.5",
+    "dez-php/dez-url": "~1.0"
+  }
+}
