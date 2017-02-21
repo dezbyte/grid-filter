@@ -30,9 +30,15 @@ foreach ($array as $name => $items) {
   }
 }
 
+
+$grid->setFilterMarker('product-filter');
+
 echo PHP_EOL, $filter->render();
 
 $grid2 = new Grid($url);
+$grid2->setPrefixPath('catalog/products/list');
+$grid2->setFilterMarker('product-filter');
 $grid2->processRequest($filter->render());
+
 
 echo PHP_EOL, $grid2;

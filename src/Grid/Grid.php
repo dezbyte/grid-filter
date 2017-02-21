@@ -145,6 +145,14 @@ class Grid
   }
   
   /**
+   * @param string $filterMarker
+   */
+  public function setFilterMarker($filterMarker)
+  {
+    $this->filterMarker = $filterMarker;
+  }
+  
+  /**
    * @return string
    */
   public function getPrefixPath()
